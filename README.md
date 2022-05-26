@@ -11,3 +11,6 @@
 # 1. https://www.forbes.com/sites/michellebruton/2021/11/24/interest-in-climbing-and-gym-memberships-have-spiked-following-sports-tokyo-olympics-debut/?sh=3daaf24326a8
 # 2. https://openbeta.io/
 # 3. https://www.climbing.com/news/mountain-project-openbeta-and-the-fight-over-climbing-data-access/
+
+
+
