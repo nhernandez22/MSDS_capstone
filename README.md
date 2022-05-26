@@ -1,4 +1,4 @@
-# MSDS Capstone 2022: Route Reccomender and Route Quality Map using OpenBeta Climbing Data 
+# MSDS Capstone 2022: Route Reccomender and Route Quality Map using OpenBeta Climbing Data
 ## By: Nina Hernandez
 
     Following the sport of climbing’s Olympic debut in Tokyo 2021 and the success of films like Free Solo featuring Alex Honnold (2018) and The Dawn Fall featuring Tommy Caldwell (2018), the population of climbers is exploding and the industry is expected to keep evolving. According to Forbes, google searches that included the term “climbing” reached an all time high in the first week of August 2021; the same time frame that men’s and women’s combined events were held (1). Not only is the sport gaining a bigger audience, but it is also attracting people like you and me to take a crack at the crag. Following the pandemic, nearly 100 climbing gyms have opened in North America and profits of El Cap, one of America’s largest operators of climbing facilities, saw a 100% increase in online interactions (1).  
