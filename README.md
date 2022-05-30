@@ -1,4 +1,4 @@
-# Route Quality Map and Reccomendation System in RShiny using OpenBeta Climbing Data
+# Route Quality Map and Recommendation System in RShiny using OpenBeta Climbing Data
 ## By: Nina Hernandez
 
       The population of climbers is exploding and we need more and better access to data to make the sport more accessible.  I am using data provided from OpenBeta, a nonprofit built and run by climbers that enables “open access and innovative uses of climbing data” (1).  I plan to build a Shiny app that will include a map of sport and trad climbing routes in the US ranked by route quality and a recommendation engine tailored to the user of any skill level.  
