@@ -16,3 +16,5 @@
 3. https://www.climbing.com/news/mountain-project-OpenBeta-and-the-fight-over-climbing-data-access/
 4. https://www.thecrag.com/
 5. https://www.mountainproject.com/
+
+<!---no major changes needed-->
