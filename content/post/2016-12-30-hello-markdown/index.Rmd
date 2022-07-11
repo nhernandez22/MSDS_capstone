@@ -10,7 +10,7 @@ tags:
 - plot
 - regression
 ---
-# <iframe src="https://connect.my_domain.com/my_app" width: 100%; height: 500px;">
+
 
      The population of climbers is exploding and we need more and better access to data to make the sport more accessible. I am using data provided from OpenBeta, a nonprofit built and run by climbers that enables “open access and innovative uses of climbing data” (1).  I built a Shiny app that includes a map of sport and trad climbing routes in Oregon ranked by route quality and a recommendation engine tailored to the user of any skill level.
       Following the sport of climbing’s Olympic debut in Tokyo 2021 and the success of films like *Free Solo* featuring Alex Honnold (2018) and *The Dawn Wall* featuring Tommy Caldwell (2018), the industry is seeing historic growth and opportunities for new, profitable markets. According to *Forbes*, Google searches that included the term “climbing” reached an all time high in the first week of August 2021; the same time frame that men’s and women’s combined events were held (2). Not only is the sport gaining a bigger audience, but it is also attracting regular people like you and me to take a crack at the crag. Following the pandemic, nearly 100 climbing gyms have opened in North America and profits of El Cap, one of America’s largest operators of climbing facilities, saw a 100% increase in online interactions (2). 
@@ -19,13 +19,13 @@ tags:
       As a young climber and data scientist, I found myself incredibly inspired by OpenBeta’s work and wanted to support the nonprofit by using their data and some of their resources for my capstone project.  I want to leverage climbing data to influence decision making for climbers of all skill sets and as a result, contribute to the overarching goal of OpenBeta which is to make the sport of climbing safer, more knowledgeable, and more accessible. Recommendation systems are extremely powerful and if done well, can be a great tool for young climbers when exploring outdoor routes. To get a better understanding of the data and to ensure the viability of this goal, I am performing an exploratory data analysis of the OpenBeta data. 
 
 # Setup 
-```{r setup, include=FALSE, echo=FALSE}
+```{r}
 library(tidyverse)
 or_ratings <- read_csv("or-ratings.csv")
 or_ratings
 ```
 
-```{r, include= FALSE, echo = FALSE}
+```{r}
 or_ratings <- or_ratings %>%
   mutate(trad = ifelse(str_extract(type, "tr") == "tr", 1, 0)) %>%
   mutate(sport = ifelse(str_extract(type, "sp") == "sp", 1, 0)) %>%
@@ -36,14 +36,14 @@ or_ratings <- or_ratings %>%
   select(-trad, -sport)
 ```
 
-```{r, include = FALSE, echo = FALSE}
+```{r}
 or_quality <-
   read_csv("or_quality_data.csv")
 
 or_quality
 ```
 
-```{r, include = FALSE, echo = FALSE}
+```{r}
 orGeo <- or_quality %>%
    mutate(lon = as.numeric(str_extract(parent_loc, '(-|)\\d+.\\d+')),
          lat = as.numeric(str_extract(parent_loc, '\\s(-|)\\d+.\\d+')))  %>%
@@ -52,7 +52,7 @@ orGeo <- or_quality %>%
 orGeo
 ```
 
-```{r, include = FALSE, echo = FALSE}
+```{r, echo = FALSE}
 #wcGeo <- rqGeo %>%
   #filter(state == "Oregon" | state == "Washington" | state == "California")
 
@@ -64,7 +64,7 @@ or_ratings <- or_ratings %>%
 or_ratings
 ```
 
-```{r, include = FALSE, echo = FALSE}
+```{r, echo = FALSE}
 my_levels = c(str_sort(or_ratings$grade) %>% unique())
 
 or_ratings <- or_ratings %>%
@@ -103,15 +103,13 @@ We are only using routes with grades that are in the Yosemite Decimal System, wh
 
 ```{r, echo = FALSE}
 or_ratings %>%
-  group_by(state, grade, level) %>%
+  group_by(grade, level) %>%
   summarise(count = n(), .groups = "drop") %>%
   mutate(perc = count/sum(count)) %>%
   ungroup() %>%
-  group_by(state) %>%
   slice_max(order_by = perc, n = 5) %>%
   ggplot(aes(x = reorder(grade, -perc), y = perc)) +
   geom_col(aes(fill = level)) +
-  facet_wrap(~state, scales = "free") +
   scale_fill_brewer(palette = "Set2") +
   labs(x = "\nGrade (YDS)", y = "Percent\n", title = "Top Proportion of Routes per Grade by State") + 
   theme_tufte() +
@@ -145,7 +143,7 @@ According to the OpenBeta, the categories for route quality are the following:
 - Bad: 0.5 >= ARQI < 1.5
 - Bomb: ARQI < 0.5 
 
-```{r, echo= FALSE, include = FALSE}
+```{r}
 or_ratings <- or_ratings %>% 
   distinct() %>%
   mutate(class = case_when(
@@ -162,7 +160,7 @@ or_ratings
 ```
 Note that some routes with a lower ARQI may have a higher median rating. The ARQI takes the number of votes into consideration. This allows for a more accurate and fair route designation (we don't want just *any* route falling into a classic). 
 
-```{r, echo = FALSE}
+```{r}
 or_ratings$class <- factor(or_ratings$class, 
                                   levels = c("classic", "area classic", "good", "bad", "bomb"))
 or_ratings %>% 
