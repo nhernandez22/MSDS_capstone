@@ -1,0 +1,9 @@
+*.psd filter=lfs diff=lfs merge=lfs -text
+content/post/2020-12-01-r-rmarkdown/all_ratings.csv filter=lfs diff=lfs merge=lfs -text
+content/post/2020-12-01-r-rmarkdown/route_quality_data.csv filter=lfs diff=lfs merge=lfs -text
+content/post/2020-12-01-r-rmarkdown/index.Rmd filter=lfs diff=lfs merge=lfs -text
+content/post/2020-12-01-r-rmarkdown/index.Rmdgit filter=lfs diff=lfs merge=lfs -text
+gi filter=lfs diff=lfs merge=lfs -text
+content/post/2020-12-01-r-rmarkdown/index.html filter=lfs diff=lfs merge=lfs -text
+content/post/2020-12-01-r-rmarkdown/index_files/ filter=lfs diff=lfs merge=lfs -text
+content/post/2022-05-30-data-science-is-awesome/ filter=lfs diff=lfs merge=lfs -text
