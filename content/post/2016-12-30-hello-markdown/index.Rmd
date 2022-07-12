@@ -122,8 +122,8 @@ or_ratings %>%
        One dataset I used from OpenBeta contains all route ratings in Oregon along with the route ID, grade, name, and type (trad, sport, ice, bouldering, etc.).I'm going to look at only trad and sport routes on the West Coast, which are the most two popular types of outdoor climbing. A limit of this method is that we lose routes that could be both sport and trad. Another dataset I used had aggregate rating data from OpenBeta along with the location of parent walls to use for plotting. The features I used from this dataset are the parent wall ID, name, and location along with the state and ARQI rating (this metric is explained later). 
 
 
-      We can see that our data is dominated by sport routes (after all, Oregon *is* the birth place of sport climbing). This raised a bias concern with an Item Based Collaborative Filtering recommendation system. With that being said, sport climbing is easily the most popular form of climbing nowadays. Not only is trad climbing out of date and mostly done by the pros, it is also extremely expensive and a result, a barrier to entry to the sport itself. Therefore I felt okay about this data imbalance when making a recommendation to a new user: they probably don't want to be reccommended trad routes for lower levels.
-```{r, echo = FALSE, message = FALSE}
+      We can see that our data is dominated by sport routes (after all, Oregon *is* the birth place of sport climbing). This raised a bias concern with an Item Based Collaborative Filtering recommendation system. With that being said, sport climbing is easily the most popular form of climbing nowadays. Not only is trad climbing out of date and mostly done by the pros, it is also extremely expensive and a result, a barrier to entry to the sport itself. Therefore I felt okay about this data imbalance when making a recommendation to a new user: they probably don't want to be recommended trad routes for lower levels.
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 library(RColorBrewer)
 library(ggthemes)
 or_ratings %>%
@@ -140,11 +140,11 @@ or_ratings %>%
        
 According to the OpenBeta, the categories for route quality are the following:
        
-+ Classic: ARQI >= 3.5
-+ Area Classic:  2.5 <= ARQI < 3.5 
-+ Good: 1.5 <= ARQI < 2.5 
-+ Bad: 0.5 >= ARQI < 1.5
-+ Bomb: ARQI < 0.5 
+1. Classic: ARQI >= 3.5
+2. Area Classic:  2.5 <= ARQI < 3.5 
+3. Good: 1.5 <= ARQI < 2.5 
+4. Bad: 0.5 >= ARQI < 1.5
+5. Bomb: ARQI < 0.5 
 
 ```{r, include = FALSE, message = FALSE, echo = FALSE}
 or_ratings <- or_ratings %>% 
@@ -223,9 +223,12 @@ Sys.getenv('MAPBOX_PUBLIC_TOKEN')
 
 ```
 
-```{r, echo = FALSE}
+```{r, include = FALSE, warning = FALSE}
 library(plotly)
+```
 
+
+```{r, message = FALSE, echo = FALSE, warning = FALSE}
 fig <- or_ratings %>%
   plot_ly(lat = ~lat, 
           lon = ~lon, 
@@ -257,7 +260,7 @@ fig <- or_ratings %>%
 fig
 ```
 
-```{r, include = FALSE, echo = FALSE}
+```{r, include = FALSE, echo = FALSE, warning = FALSE}
 metric <- "ARQI_median"
 sport <- 'sport'
 
@@ -284,7 +287,7 @@ orGeo_sport
 
 After setting various filters on the app, a map colored and sized by route quality would be provided to help the climber find the best possible routes in their ideal range. 
 
-```{r, echo = FALSE, message = FALSE}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 orGeo_sport %>%
   plot_ly(lat = ~lat, 
           lon = ~lon, 
@@ -329,7 +332,7 @@ orGeo_trad
 ```
 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 orGeo_trad %>%
   plot_ly(lat = ~lat, 
           lon = ~lon, 
@@ -363,7 +366,7 @@ or_ratings <- or_ratings[complete.cases(or_ratings),]
 ```
 
 ## Find a route we care about 
-We are going to choose a route to get a reccomendation for in the California area. We will choose the "most popular route" by the sum of votes. 
+We are going to choose a route to get a recommendation for in the California area. We will choose the "most popular route" by the sum of votes. 
 ```{r, include = FALSE, echo = FALSE}
 or_ratings %>%
   group_by(route_id) %>%
@@ -412,7 +415,7 @@ sum(is.na(or_mat))/(ncol(or_mat) * nrow(or_mat))
 
 We use cosine similarity to measure distances versus the Euclidean distance because cosine looks at directional similarity rather than magnitudal differences. Here I am hoping to capture beyond the numbers and get the content that the numbers tell. For example, a route that gets a rating of 3.0 four times and 4.0 eight times will have a 100% similarity score to a route that has one 3.0 ratings and two 4.0 ratings. If we were computing euclidean distance, this would give us a similarity of only 13%. I'm hoping that this method can be viable in tackling the data sparsity issue. 
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 library(lsa)
 
 route_x <- c(4, 8)
