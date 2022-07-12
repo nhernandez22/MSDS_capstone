@@ -123,7 +123,7 @@ or_ratings %>%
 
 
       We can see that our data is dominated by sport routes (after all, Oregon *is* the birth place of sport climbing). This raised a bias concern with an Item Based Collaborative Filtering recommendation system. With that being said, sport climbing is easily the most popular form of climbing nowadays. Not only is trad climbing out of date and mostly done by the pros, it is also extremely expensive and a result, a barrier to entry to the sport itself. Therefore I felt okay about this data imbalance when making a recommendation to a new user: they probably don't want to be reccommended trad routes for lower levels.
-```{r, echo = FALSE}
+```{r, echo = FALSE, message = FALSE}
 library(RColorBrewer)
 library(ggthemes)
 or_ratings %>%
@@ -140,13 +140,13 @@ or_ratings %>%
        
 According to the OpenBeta, the categories for route quality are the following:
        
-  * Classic: ARQI >= 3.5
-  * Area Classic:  2.5 <= ARQI < 3.5 
-  * Good: 1.5 <= ARQI < 2.5 
-  * Bad: 0.5 >= ARQI < 1.5
-  * Bomb: ARQI < 0.5 
++ Classic: ARQI >= 3.5
++ Area Classic:  2.5 <= ARQI < 3.5 
++ Good: 1.5 <= ARQI < 2.5 
++ Bad: 0.5 >= ARQI < 1.5
++ Bomb: ARQI < 0.5 
 
-```{r, include = FALSE, echo = FALSE}
+```{r, include = FALSE, message = FALSE, echo = FALSE}
 or_ratings <- or_ratings %>% 
   distinct() %>%
   mutate(class = case_when(
