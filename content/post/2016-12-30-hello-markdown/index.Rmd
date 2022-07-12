@@ -251,7 +251,7 @@ fig <- or_ratings %>%
   layout(
     mapbox = list(
       style = 'open-street-map', # or 'light'
-      zoom = 5,
+      zoom = 4,
       center = list(lon = -121, lat = 44)
     )
   ) %>%
@@ -300,7 +300,7 @@ orGeo_sport %>%
    layout(
     mapbox = list(
       style = 'open-street-map', # or 'light'
-      zoom = 5,
+      zoom = 4,
       center = list(lon = -121, lat = 44)
     )
   ) %>%
