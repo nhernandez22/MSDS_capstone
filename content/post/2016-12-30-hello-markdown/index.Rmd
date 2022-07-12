@@ -12,19 +12,20 @@ categories:
 - Visualizations
 ---
      The population of climbers is exploding and we need more and better access to data to make the sport more accessible. I am using data provided from OpenBeta, a nonprofit built and run by climbers that enables “open access and innovative uses of climbing data” (1).  I built a Shiny app that includes a map of sport and trad climbing routes in Oregon ranked by route quality and a recommendation engine tailored to the user of any skill level.  
-     Following the sport of climbing’s Olympic debut in Tokyo 2021 and the success of films like *Free Solo* featuring Alex Honnold (2018) and *The Dawn Wall* featuring Tommy Caldwell (2018), the industry is seeing historic growth and opportunities for new, profitable markets. According to *Forbes*, Google searches that included the term “climbing” reached an all time high in the first week of August 2021; the same time frame that men’s and women’s combined events were held (2). Not only is the sport gaining a bigger audience, but it is also attracting regular people like you and me to take a crack at the crag. Following the pandemic, nearly 100 climbing gyms have opened in North America and profits of El Cap, one of America’s largest operators of climbing facilities, saw a 100% increase in online interactions (2). 
-      One concern with the sport’s booming popularity is the barrier to entry and as a result, there has been a push to make the sport more accessible. In addition, there are only a few databases with outdoor climbing routes that are in access to the public like The Mountain Project or 8A. Without these platforms, climbers who are looking to hit their local crag or boulder may not be able to find routes or know about the quality of them if they do not already have community or word of mouth. While these websites have provided helpful tools to climbers of all experience and skill levels, they are still heavily lacking data and scrapings of these platforms have resulted in DMCA takedowns or lawsuits (3). At the bare minimum, we need better and easier access to climbing data so that data scientists like myself can work to advance the sport for others. As the sport grows so will the influx of data, and with any field that is expanding and rapidly changing, data science can add value to it by making better-informed decisions for multiple stakeholders, generating new insights about its players and audience, and increasing the overall experience for users.  
+     Following the sport of climbing’s Olympic debut in Tokyo 2021 and the success of films like *Free Solo* featuring Alex Honnold (2018) and *The Dawn Wall* featuring Tommy Caldwell (2018), the industry is seeing historic growth and opportunities for new, profitable markets. According to *Forbes*, Google searches that included the term “climbing” reached an all time high in the first week of August 2021; the same time frame that men’s and women’s combined events were held (2). Not only is the sport gaining a bigger audience, but it is also attracting regular people like you and me to take a crack at the crag. Following the pandemic, nearly 100 climbing gyms have opened in North America and profits of El Cap, one of America’s largest operators of climbing facilities, saw a 100% increase in online interactions (2).  
+     
+     One concern with the sport’s booming popularity is the barrier to entry and as a result, there has been a push to make the sport more accessible. In addition, there are only a few databases with outdoor climbing routes that are in access to the public like The Mountain Project or 8A. Without these platforms, climbers who are looking to hit their local crag or boulder may not be able to find routes or know about the quality of them if they do not already have community or word of mouth. While these websites have provided helpful tools to climbers of all experience and skill levels, they are still heavily lacking data and scrapings of these platforms have resulted in DMCA takedowns or lawsuits (3). At the bare minimum, we need better and easier access to climbing data so that data scientists like myself can work to advance the sport for others. As the sport grows so will the influx of data, and with any field that is expanding and rapidly changing, data science can add value to it by making better-informed decisions for multiple stakeholders, generating new insights about its players and audience, and increasing the overall experience for users.  
       OpenBeta is a non-profit built and run by climbers that enables “open access and innovative uses of climbing data” (1). Though they have also faced several challenges with their attempt to use onX’s data from the Mountain Project with copyright infringement and blocked repositories, according to *Outside Learn* (3). At the moment their data is public, and Github recently reversed the DMCA takedown thanks to legal efforts from the owner, Viet Nguyen, who is "empowering the community with open license climbing betas and source tools" (1). His goal for OpenBeta is to make climbing data more like an open source project, which in turn would help platforms like Mountain Project to increase their recommendation systems, geolocation data, and the accuracy of submissions (3). In addition to pushing for accessible data, the OpenBeta also posts articles that fit the needs of any climber in STEM: tutorials, current events, and project inspirations like recommendation systems and route quality maps. The community that OpenBeta is fostering aligns heavily with the forward mentality of climbing currently which is: don’t be a gatekeeper, spread the beta, and anyone is capable.  
       As a young climber and data scientist, I found myself incredibly inspired by OpenBeta’s work and wanted to support the nonprofit by using their data and some of their resources for my capstone project.  I want to leverage climbing data to influence decision making for climbers of all skill sets and as a result, contribute to the overarching goal of OpenBeta which is to make the sport of climbing safer, more knowledgeable, and more accessible. Recommendation systems are extremely powerful and if done well, can be a great tool for young climbers when exploring outdoor routes. To get a better understanding of the data and to ensure the viability of this goal, I am performing an exploratory data analysis of the OpenBeta data. 
 
 # Setup 
-```{r setup}
+```{r setup, include = FALSE}
 library(tidyverse)
 or_ratings <- read_csv("or-ratings.csv")
 or_ratings
 ```
 
-```{r}
+```{r, include = FALSE}
 or_ratings <- or_ratings %>%
   mutate(trad = ifelse(str_extract(type, "tr") == "tr", 1, 0)) %>%
   mutate(sport = ifelse(str_extract(type, "sp") == "sp", 1, 0)) %>%
@@ -35,14 +36,14 @@ or_ratings <- or_ratings %>%
   select(-trad, -sport)
 ```
 
-```{r}
+```{r, include = FALSE}
 or_quality <-
   read_csv("or_quality_data.csv")
 
 or_quality
 ```
 
-```{r}
+```{r, include = FALSE}
 orGeo <- or_quality %>%
    mutate(lon = as.numeric(str_extract(parent_loc, '(-|)\\d+.\\d+')),
          lat = as.numeric(str_extract(parent_loc, '\\s(-|)\\d+.\\d+')))  %>%
@@ -51,7 +52,7 @@ orGeo <- or_quality %>%
 orGeo
 ```
 
-```{r, echo = FALSE}
+```{r, include = FALSE}
 #wcGeo <- rqGeo %>%
   #filter(state == "Oregon" | state == "Washington" | state == "California")
 
@@ -136,11 +137,12 @@ or_ratings %>%
       As part of my exploratory data analysis, I also wanted to get a breakdown of classic routes. As a metric for route quality, we can look at the aggregate metric RQI or ARQI. The RQI is equal to S(1-1/N) where S is the average stars (or median) and N is the number of votes. As N approaches infinity, (1-1/N) approaches 1 and RQI approaches S. One issue with this metric is that harder routes get fewer ascents and therefore less votes, making it difficult for hard routes to make it into the "classic" class. We will use the Adjusted RQI (ARQI), which corrects for bias of RQI towards easier routes by adjusting the number of votes and therefore doesn't make route quality a "popularity metric." The ARQI is equal to S(1-1/Nw) where Nw is the number of weighted or adjusted votes and  is determined by the votes-per-route for each grade. 
        
 According to the OpenBeta, the categories for route quality are the following:
-- Classic: ARQI >= 3.5
-- Area Classic:  2.5 <= ARQI < 3.5 
-- Good: 1.5 <= ARQI < 2.5 
-- Bad: 0.5 >= ARQI < 1.5
-- Bomb: ARQI < 0.5 
+       
+  - Classic: ARQI >= 3.5
+  - Area Classic:  2.5 <= ARQI < 3.5 
+  - Good: 1.5 <= ARQI < 2.5 
+  - Bad: 0.5 >= ARQI < 1.5
+  - Bomb: ARQI < 0.5 
 
 ```{r}
 or_ratings <- or_ratings %>% 
@@ -199,9 +201,9 @@ or_ratings %>%
 
 ## Plot routes
 
-      I plan to combine a recommendation and route ranking system in a map format using geolocation and ratings data. Specifically, I will use Plotly for interactivity, Mapbox for geocoding, and Shiny for construction of the web application. Here I am accessing my public token from Mapbox in order to do some basic plotting and interactivity with Plotly. 
+      After some exploratory data analysis, I wanted to experiment with the functionality of my shiny app. I wanted to design a route finder that would combine a recommendation and route ranking system in a map format using geolocation and ratings data. I used Plotly for interactivity, Mapbox for geocoding, and Shiny for construction of the web application. I accessed a public token from Mapbox in order to do some basic plotting and interactivity with Plotly. First I plotted all parent walls for both trad and sport and colored each wall based on its highest quality route. Then with the idea that the user could filter routes by type, I plotted the routes by type and improved the formatting to be colored and sized by the ARQI (adjusted median rating). 
 
-```{r}
+```{r, include = FALSE}
 library(mapboxapi)
 
 my_token <- 'pk.eyJ1Ijoibmhlcm5hbmRlejE5OTkiLCJhIjoiY2wzZGZjZDEwMDFyajNjbDVxMnJ2M2lwdSJ9.N9R9fzcgvK1ieQ_s5eVwQw'
@@ -215,9 +217,7 @@ Sys.getenv('MAPBOX_PUBLIC_TOKEN')
 
 ```
 
-## Plot all West Coast walls 
-With some basic plotly commands, we can plot all the West Coast routes. Ideally the user will be able to filter grade range, type, location, and rating on the Shiny app. 
-```{r}
+```{r, echo = FALSE}
 library(plotly)
 
 fig <- or_ratings %>%
@@ -250,11 +250,8 @@ fig <- or_ratings %>%
 
 fig
 ```
-## Sport
 
-Now we plot by type using ARQI_median as metric for 'route quality.' Here I'm doing some basic data wrangling to find the route with the best ARQI for parent walls with sport routes. 
-
-```{r}
+```{r, include = FALSE}
 metric <- "ARQI_median"
 sport <- 'sport'
 
@@ -281,7 +278,7 @@ orGeo_sport
 
 After setting various filters on the app, a map colored and sized by route quality would be provided to help the climber find the best possible routes in their ideal range. 
 
-```{r message = FALSE}
+```{r, echo = FALSE, message = FALSE}
 orGeo_sport %>%
   plot_ly(lat = ~lat, 
           lon = ~lon, 
@@ -301,9 +298,8 @@ orGeo_sport %>%
   config(mapboxAccessToken = Sys.getenv("MAPBOX_PUBLIC_TOKEN"))
 
 ```
-## Trad
-I did a similar process for trad routes.
-```{r}
+
+```{r, include=FALSE}
 trad <- 'trad'
 
 df_trad <- orGeo %>%
@@ -328,7 +324,7 @@ orGeo_trad
 
 ## Plot 
 
-```{r}
+```{r, echo = FALSE}
 orGeo_trad %>%
   plot_ly(lat = ~lat, 
           lon = ~lon, 
@@ -483,6 +479,9 @@ rec_tbl <- recommendations %>%
 
 rec_tbl
 ```
+
+## shiny app 
+In the app, the ser will be able to filter grade range, type, location, and rating on the Shiny app.
 
 # Conclusion 
 
