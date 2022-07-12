@@ -139,7 +139,7 @@ or_ratings %>%
       As part of my exploratory data analysis, I also wanted to get a breakdown of classic routes. As a metric for route quality, we can look at the aggregate metric RQI or ARQI. The RQI is equal to S(1-1/N) where S is the average stars (or median) and N is the number of votes. As N approaches infinity, (1-1/N) approaches 1 and RQI approaches S. One issue with this metric is that harder routes get fewer ascents and therefore less votes, making it difficult for hard routes to make it into the "classic" class. We will use the Adjusted RQI (ARQI), which corrects for bias of RQI towards easier routes by adjusting the number of votes and therefore doesn't make route quality a "popularity metric." The ARQI is equal to S(1-1/Nw) where Nw is the number of weighted or adjusted votes and  is determined by the votes-per-route for each grade. 
        
 According to the OpenBeta, the categories for route quality are the following:
-       
+
 1. Classic: ARQI >= 3.5
 2. Area Classic:  2.5 <= ARQI < 3.5 
 3. Good: 1.5 <= ARQI < 2.5 
@@ -252,7 +252,7 @@ fig <- or_ratings %>%
     mapbox = list(
       style = 'open-street-map', # or 'light'
       zoom = 5,
-      center = list(lon = -120, lat = 44)
+      center = list(lon = -121, lat = 44)
     )
   ) %>%
   config(mapboxAccessToken = Sys.getenv("MAPBOX_PUBLIC_TOKEN"))
@@ -297,11 +297,11 @@ orGeo_sport %>%
           hoverinfo = 'text',
           color = ~ orGeo_sport$ARQI_median,
           size = ~ orGeo_sport$ARQI_median) %>%
-  layout(
-     mapbox = list(
+   layout(
+    mapbox = list(
       style = 'open-street-map', # or 'light'
       zoom = 5,
-      center = list(lon = -120, lat = 44)
+      center = list(lon = -121, lat = 44)
     )
   ) %>%
   config(mapboxAccessToken = Sys.getenv("MAPBOX_PUBLIC_TOKEN"))
@@ -343,7 +343,7 @@ orGeo_trad %>%
           color = ~ orGeo_trad$ARQI_median,
           size = ~ orGeo_trad$ARQI_median) %>%
   layout(
-     mapbox = list(
+    mapbox = list(
       style = 'open-street-map', # or 'light'
       zoom = 5,
       center = list(lon = -120, lat = 44)
