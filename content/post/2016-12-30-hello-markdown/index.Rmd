@@ -19,13 +19,13 @@ categories:
       As a young climber and data scientist, I found myself incredibly inspired by OpenBeta’s work and wanted to support the nonprofit by using their data and some of their resources for my capstone project.  I want to leverage climbing data to influence decision making for climbers of all skill sets and as a result, contribute to the overarching goal of OpenBeta which is to make the sport of climbing safer, more knowledgeable, and more accessible. Recommendation systems are extremely powerful and if done well, can be a great tool for young climbers when exploring outdoor routes. To get a better understanding of the data and to ensure the viability of this goal, I am performing an exploratory data analysis of the OpenBeta data. 
 
 # Setup 
-```{r setup, include = FALSE}
+```{r setup, include = FALSE, echo = FALSE}
 library(tidyverse)
 or_ratings <- read_csv("or-ratings.csv")
 or_ratings
 ```
 
-```{r, include = FALSE}
+```{r, include = FALSE, echo = FALSE}
 or_ratings <- or_ratings %>%
   mutate(trad = ifelse(str_extract(type, "tr") == "tr", 1, 0)) %>%
   mutate(sport = ifelse(str_extract(type, "sp") == "sp", 1, 0)) %>%
@@ -36,14 +36,14 @@ or_ratings <- or_ratings %>%
   select(-trad, -sport)
 ```
 
-```{r, include = FALSE}
+```{r, include = FALSE, echo = FALSE}
 or_quality <-
   read_csv("or_quality_data.csv")
 
 or_quality
 ```
 
-```{r, include = FALSE}
+```{r, include = FALSE, echo = FALSE}
 orGeo <- or_quality %>%
    mutate(lon = as.numeric(str_extract(parent_loc, '(-|)\\d+.\\d+')),
          lat = as.numeric(str_extract(parent_loc, '\\s(-|)\\d+.\\d+')))  %>%
@@ -52,7 +52,7 @@ orGeo <- or_quality %>%
 orGeo
 ```
 
-```{r, include = FALSE}
+```{r, include = FALSE, echo = FALSE}
 #wcGeo <- rqGeo %>%
   #filter(state == "Oregon" | state == "Washington" | state == "California")
 
