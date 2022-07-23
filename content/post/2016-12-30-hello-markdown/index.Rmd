@@ -497,7 +497,7 @@ rec_tbl
 ```{r}
 knitr::include_url("https://nhernandez.shinyapps.io/climbing_app/", height = "1000px")
 ```
-(https://nhernandez.shinyapps.io/climbing_app/)
+**Link:** https://nhernandez.shinyapps.io/climbing_app/
 
      The incorporation of the route recommender is my favorite part of the Shiny app. If the user clicks on a row of the main table, a second table popups to the right of the plot with the top five recommendations for that route. This mini table also has metadata about the various routes and specifically the parent wall that each route is located at. With this information the user can enter individual parent walls (see the “Enter a Parent Wall" input option on the top left panel) for plotting, which allows the users to see where recommended routes are located relative to the initial parent wall they clicked on the map.  
      I wanted to make the functionality of the app as user friendly as possible. I wanted to match the natural intuition of user experience by making the app be fluid and continuous, but I also wanted to provide guidance if a user gets stuck. There are help buttons that provide an overview of class and grade distributions that were explained earlier in this article. This gives the user a solid place to start for navigating routes if they're unsure what they want. Notice, however, that the help buttons have to be clicked in order to trigger the pop-ups. I don't want to "scare" the user away with information overload by covering the entire shiny app with text. I also don't want users to feel like there is a *right* place to start -- I want the experience to be their own and freely structured.   
