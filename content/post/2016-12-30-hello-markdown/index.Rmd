@@ -493,7 +493,7 @@ rec_tbl
 ## Shiny app 
      With the proof of concept complete I was able to bring all the working pieces together in constructing my Shiny app. As seen below, the user can apply basic filters such as the grade range and type to get a quick map of available routes. When the user hovers over a point on the map, they get an overview of the parent wall which includes the name and location of the wall and information about an example route at the wall. If they click the parent wall, they can get a list of all the routes at the wall with more granularity. The table below includes additional metadata such as the number of votes, the grade class, the level class and more for each route. 
 
-```{echo = FALSE}
+```{r}
 knitr::include_url("https://nhernandez.shinyapps.io/climbing_app/")
 ```
 
