@@ -17,11 +17,8 @@ menu:
     - name: About
       url: /about/
     - name: GitHub
-      url: https://github.com/rstudio/blogdown
-    - name: Twitter
-      url: https://twitter.com/rstudio
-    - name: EDA 
-    - url: /EDA/
+      url: https://github.com/nhernandez22/MSDS_capstone/tree/main
+
 params:
   MathJaxCDN: //cdnjs.cloudflare.com/ajax/libs
   MathJaxVersion: 2.7.5

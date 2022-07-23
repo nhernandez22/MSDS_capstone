@@ -1,5 +1,5 @@
 ---
-title: 'Exploratory Data Analysis: OpenBeta Climbing Data (2022)'
+title: 'Route Finder App using OpenBeta Climbing Data'
 author: "Nina"
 date: '2022-05-30'
 output:
@@ -506,7 +506,7 @@ knitr::include_url("https://nhernandez.shinyapps.io/climbing_app/", height = "10
 # Conclusion 
 
      One limitation of my project is the restriction placed on the data I’m using. Following a legal battle with onX regarding a copyright infringement, which OpenBeta won (as noncommercial and educational factual data cannot be copyrighted), OpenBeta is working to release their data under a public domain, permissive license (1,3). For this reason, all of OpenBeta’s current datasets only include user ratings up to 2020, and it doesn’t seem like they will be able to update them by August. Therefore, there is a missed opportunity for generating better recommendations without input following the increase of climbers after Tokyo. In the future, climbing data from the Mountain Project will be streamed directly into the model prior to rollouts and will allow for optimal and more accurate results or recommendations.  
-      My route finder is free resource to the Oregon climbing community which streamlines the route searching process for climbers of varying skill sets. I also hope that this blog post serves as a resource that any stakeholder (like participants, spectators, media, sponsors, businesses, brands, developers, analysts etc.) could benefit from. Guiding the recent explosion of climbers properly could help make the sport extremely profitable and the climbing community greater and diverse. I hope to help dissolve barriers to entry by providing a tool to climbers that keeps them safe, in the loop, and connected to other climbers. For the data community, I also want to promote the open source movement in software and data as I strongly believe that it is essential in encouraging innovation, attracting diverse talent, and broadening perspectives within tech. 
+      My route finder is free tool to the Oregon climbing community which streamlines the route searching process for climbers of varying skill sets. I also hope that this post is a resource that any stakeholder (like participants, spectators, media, sponsors, businesses, brands, developers, analysts etc.) could benefit from. Guiding the recent explosion of climbers properly could help make the sport extremely profitable and the climbing community greater and diverse. I hope to help dissolve barriers to entry by providing a tool to climbers that keeps them safe, in the loop, and connected to other climbers. For the data community, I also want to promote the open source movement in software and data as I strongly believe that it is essential in encouraging innovation, attracting diverse talent, and broadening perspectives within tech. 
 
 1. https://OpenBeta.io/
 2. https://www.forbes.com/sites/michellebruton/2021/11/24/interest-in-climbing-and-gym-memberships-have-spiked-following-sports-tokyo-olympics-debut/?sh=3daaf24326a8
