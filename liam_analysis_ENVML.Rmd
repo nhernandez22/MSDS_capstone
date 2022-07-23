@@ -1,0 +1,433 @@
+---
+title: "Project 2 Draft 1"
+author: "Liam Keefe & Nina Hernandez"
+date: '2022-07-18'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(RColorBrewer)
+library(ggthemes)
+library(groupdata2)
+library(caret)
+library(fastDummies)
+library(rpart)
+library(rpart.plot)
+```
+
+```{r}
+gpus <- read_csv("~/gpus.csv")
+emissions <- read_csv("~/2021-10-27yearly_averages.csv")
+impact <- read_csv("~/impact.csv")
+```
+
+```{r}
+## Countries in each table
+impact %>%
+  distinct(country) %>%
+  arrange(country)
+emissions %>%
+  distinct(Country) %>%
+  arrange(Country)
+## Finding Countries unique to each table
+emissions %>%
+  distinct(Country) %>%
+  mutate(A = "A") %>%
+  left_join(impact %>%
+  distinct(country) %>%
+    mutate(B = "B"), by=c("Country" = "country"))
+impact %>%
+  distinct(country) %>%
+  mutate(B = "B") %>%
+  left_join(emissions %>%
+  distinct(Country) %>%
+    mutate(A = "A"), by=c("country" = "Country"))
+```
+
+```{r}
+## Fixing US tag to match that in impact table
+emissions_fixed <- emissions %>%
+  mutate(Country = ifelse(Country == "United States of America", "USA", Country))
+
+```
+
+```{r}
+## Filtering out Countries that are unique in each dataframe
+em_list <- emissions_fixed %>%
+  distinct(Country) %>%
+  anti_join(impact %>%
+  distinct(country), by=c("Country" = "country"))
+emissions_subset <- emissions_fixed %>%
+  filter(!(Country %in% em_list$Country), !is.na(carbon_intensity_avg), year >= 2017)
+imp_list <- impact %>%
+  distinct(country) %>%
+  anti_join(emissions_fixed %>%
+  distinct(Country), by=c("country" = "Country"))
+impact_subset <- impact %>%
+  filter(!(country %in% imp_list$country), provider != 'ovh')
+
+em_list
+```
+
+```{r}
+## Checking if number of countries is now the same across both tables
+emissions %>%
+  distinct(Country) %>%
+  count(name="# of countries")
+impact %>%
+  distinct(country) %>%
+  count(name="# of countries")
+emissions_subset %>%
+  distinct(Country) %>%
+  count(name="# of countries")
+impact_subset %>%
+  distinct(country) %>%
+  count(name="# of countries")
+```
+
+```{r}
+## Comparing number of regions in each country
+emissions_subset %>%
+  group_by(Country) %>%
+  distinct(zone_key) %>%
+  count(name = "n_e") %>%
+  inner_join(impact_subset %>%
+               group_by(country) %>%
+               distinct(region) %>%
+               count(name = "n_i"), by=c("Country" = "country"))
+```
+
+
+
+```{r}
+## Ranking Countries by total carbon intensity 
+table_ems <- emissions_fixed %>%
+  # Enusring all countries have same years and are population
+  filter(year >= 2017, !is.na(carbon_intensity_avg)) %>%
+  mutate(year = as.factor(year)) %>%
+  group_by(Country, year) %>%
+  mutate(total_avg = sum(carbon_intensity_avg))
+period_rankings <- table_ems %>%
+  group_by(Country) %>%
+  summarize(total_period_avg = mean(total_avg)) %>%
+  ungroup() %>%
+  mutate(total_period_rank = order(order(total_period_avg, decreasing = T))) %>%
+  arrange(total_period_rank)
+table_ems <- table_ems %>%
+  inner_join(period_rankings)
+## Ranking Country and showing yearly total carbon intensity
+table_ems %>%
+  filter(total_period_rank < 11) %>%
+  ggplot(aes(reorder(Country, total_period_rank), total_avg, fill=year)) + 
+  geom_col(position="dodge", alpha=0.4) + 
+  scale_fill_viridis_d() +
+  labs(title="Carbon Intensity Per Annum", y="Total average carbon intensity", x="Country", fill="Year") +
+  theme_clean() +
+  theme(
+    axis.text.x = element_text(angle=45)
+  )
+```
+
+```{r}
+## Same above analysis with whole table but just now with the subset table
+table_ems_s <- emissions_subset %>%
+  mutate(year = as.factor(year)) %>%
+  group_by(Country, year) %>%
+  mutate(total_avg = sum(carbon_intensity_avg))
+period_rankings_s <- table_ems_s %>%
+  group_by(Country) %>%
+  summarize(total_period_avg = mean(total_avg)) %>%
+  ungroup() %>%
+  mutate(total_period_rank = order(order(total_period_avg, decreasing = T))) %>%
+  arrange(total_period_rank)
+table_ems_s <- table_ems_s %>%
+  inner_join(period_rankings_s)
+table_ems_s %>%
+  mutate(year = as.factor(year)) %>%
+  group_by(Country, year) %>%
+  mutate(total_avg = sum(carbon_intensity_avg)) %>%
+  ggplot(aes(reorder(Country, total_period_rank), total_avg, fill=year)) + 
+  geom_col(position="dodge", alpha=0.4) + 
+  scale_fill_viridis_d() +
+  labs(title="Carbon Intensity Per Annum", y="Total average carbon intensity", x="Country", fill="Year") +
+  theme_clean() +
+  theme(
+    axis.text.x = element_text(angle=45)
+  )
+```
+
+```{r}
+## Carbon Impact per country ranked
+impact %>%
+  group_by(country) %>%
+  summarize(total_impact = sum(impact)) %>%
+  mutate(rank = order(order(total_impact, decreasing=T))) %>%
+  filter(rank < 11) %>%
+  ggplot(aes(reorder(country, rank), total_impact, fill=country)) + 
+  geom_col(position="dodge", show.legend = F) + 
+  scale_fill_viridis_d() +
+  labs(title="Carbon Impact Per Annum", y="Total impact", x="Country") +
+  theme_clean() +
+  theme(
+    axis.text.x = element_text(angle=45, vjust=0.75)
+  )
+```
+
+```{r}
+## Carbon Impact per country ranked: subset table
+impact_subset %>%
+  group_by(country) %>%
+  summarize(total_impact = sum(impact)) %>%
+  mutate(rank = order(order(total_impact, decreasing=T))) %>%
+  ggplot(aes(reorder(country, rank), total_impact, fill=country)) + 
+  geom_col(position="dodge", show.legend = F) + 
+  scale_fill_viridis_d() +
+  labs(title="Carbon Impact Per Annum", y="Total impact", x="Country") +
+  theme_clean() +
+  theme(
+    axis.text.x = element_text(angle=45, vjust=0.75)
+  )
+```
+
+```{r}
+USA_emissions <- emissions_subset %>%
+  mutate(year = as.factor(year)) %>%
+  filter(Country == "USA") 
+## Density Plot of carbon intensity of US regions
+USA_emissions %>%
+  group_by(year) %>%
+  mutate(avg_c = mean(carbon_intensity_avg, na.rm=T)) %>%
+  ggplot(aes(carbon_intensity_avg, fill=year, group=year)) +
+  geom_density(alpha=0.4) +
+  geom_vline(aes(xintercept = avg_c, color=year), show.legend=F) +
+  theme_clean() +
+  labs(title="Where Carbon Intensity is moving", subtitle="Over all zones in the US: The distribution of carbon intensity", y=NULL, x="Carbon Intensity", fill="Year") +
+  theme(
+    axis.text.y = element_blank(), 
+    axis.ticks.y = element_blank()
+  )
+## Total Year of year change in carbon intensity in each region from 2017-2021
+USA_emissions %>%
+  group_by(zone_key) %>%
+  arrange(zone_key, year) %>%
+  mutate(yoy_c_diff = carbon_intensity_avg - lag(carbon_intensity_avg, 1)) %>%
+  summarize(yoy = sum(yoy_c_diff, na.rm=T)) %>%
+  ggplot(aes(reorder(zone_key, yoy), yoy)) +
+  geom_col(aes(fill = ifelse(yoy < 0, T, F))) +
+  labs(title="Year over Year change in carbon intensity", subtitle="Over all zones in the US", x=NULL, y="Year over year difference", fill="Yoy intensity decrease?") +
+  theme_clean() +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+```
+
+```{r}
+## US Regions with increases in carbon intensity
+USA_emissions %>%
+  group_by(zone_key) %>%
+  arrange(zone_key, year) %>%
+  mutate(yoy_c_diff = carbon_intensity_avg - lag(carbon_intensity_avg, 1)) %>%
+  summarize(yoy = sum(yoy_c_diff, na.rm=T)) %>%
+  filter(yoy > 0) %>%
+  ungroup() %>%
+  mutate(avg_yoy = mean(yoy)) %>%
+  ggplot(aes(reorder(zone_key, yoy), yoy)) +
+  geom_col() +
+  geom_hline(aes(yintercept = avg_yoy), color="red", linetype="dashed") + 
+  theme_clean() +
+  labs(title="Where Carbon Intensity is Increasing", x=NULL, y="Year over year difference") +
+  theme(
+    axis.text.x = element_text(angle=45, vjust=0.5)
+  )
+## US Regions with decreases in carbon intensity
+USA_emissions%>%
+  group_by(zone_key) %>%
+  arrange(zone_key, year) %>%
+  mutate(yoy_c_diff = carbon_intensity_avg - lag(carbon_intensity_avg, 1)) %>%
+  summarize(yoy = sum(yoy_c_diff, na.rm=T)) %>%
+  filter(yoy < 0) %>%
+  ungroup() %>%
+  mutate(avg_yoy = mean(yoy)) %>%
+  ggplot(aes(reorder(zone_key, yoy), yoy)) +
+  geom_col() +
+  geom_hline(aes(yintercept = avg_yoy), color="red", linetype="dashed") + 
+  labs(title="Overall Carbon Intensity is Decreasing", subtitle="63 of 77 zones showing decrease", x=NULL, y="Year over year difference") +
+  theme_clean() + 
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+```
+
+```{r}
+## Total Year over year change in carbon intensity by country
+emissions %>%
+  mutate(year = as.factor(year)) %>%
+  group_by(Country, year) %>%
+  mutate(total_c = sum(carbon_intensity_avg)) %>%
+  ungroup() %>%
+  group_by(Country) %>%
+  arrange(Country, year) %>%
+  mutate(yoy_c_diff = total_c - lag(total_c, 1)) %>%
+  summarize(yoy = sum(yoy_c_diff, na.rm=T)) %>%
+  ggplot(aes(reorder(Country, yoy), yoy)) +
+  geom_col(aes(fill = ifelse(yoy < 0, T, F))) +
+  theme_clean() +
+  labs(title="Change in Carbon Intensity", subtitle="Total Year over Year change 2017-2021", y="Year over year change", x=NULL, fill="Yoy < 0") + 
+  theme(
+    axis.text.x = element_text(angle=45, vjust=0.5),
+    axis.ticks.x = element_blank()
+  )
+## Total Year over year change in carbon intensity by country: minus US
+emissions %>%
+  filter(Country != "United States of America") %>%
+  mutate(year = as.factor(year)) %>%
+  group_by(Country, year) %>%
+  mutate(total_c = sum(carbon_intensity_avg)) %>%
+  ungroup() %>%
+  group_by(Country) %>%
+  arrange(Country, year) %>%
+  mutate(yoy_c_diff = total_c - lag(total_c, 1)) %>%
+  summarize(yoy = sum(yoy_c_diff, na.rm=T)) %>%
+  ggplot(aes(reorder(Country, yoy), yoy)) +
+  geom_col(aes(fill = ifelse(yoy < 0, T, F))) +
+  theme_clean() +
+  labs(title="Change in Carbon Intensity", subtitle="Total Year over Year change 2017-2021", y="Year over year change", x=NULL, fill="Yoy < 0") + 
+  theme(
+    axis.text.x = element_text(angle=45, vjust=0.5),
+    axis.ticks.x = element_blank()
+  )
+```
+
+
+```{r}
+## Summary table ranking carbon intensity and impact
+country_impacts<- table_ems_s %>%
+  group_by(Country) %>%
+  summarize(total_period_avg = mean(total_period_avg), total_period_rank = mean(total_period_rank)) %>%
+  inner_join(
+    impact_subset %>%
+      group_by(country) %>%
+      summarize(total_impact = sum(impact)) %>%
+      mutate(impact_rank = order(order(total_impact, decreasing=T))), by = c("Country" = "country")
+    )
+```
+
+```{r}
+## Creating dummy variables and cluster variable
+emissions_dummy <- emissions %>%
+  filter(!is.na(carbon_intensity_avg)) %>%
+  mutate(year_f = as.factor(year)) %>%
+  mutate(country_f = as.factor(Country)) %>%
+  select(-Country, -year, -`Zone Name`)
+emissions_dummy_df <- dummy_cols(emissions_dummy, remove_selected_columns = T) 
+kclust <- kmeans(emissions_dummy_df %>% select(-carbon_intensity_avg), centers=3)
+## Kclust table
+emissions_dummy_df2 <- emissions_dummy_df %>%
+  mutate(kclust = kclust$cluster)
+emissions_dummy_df %>%
+  mutate(compact_bin = cut(carbon_intensity_avg, breaks = 3))  %>%
+  ggplot(aes(compact_bin, carbon_intensity_avg)) +
+  geom_col()
+## Cut breaks table
+emissions_dummy_df <- emissions_dummy_df %>%
+  mutate(compact_bin = cut(carbon_intensity_avg, breaks = 3))  %>%
+  select(-carbon_intensity_avg)
+```
+
+```{r}
+colnames(emissions_dummy_df) <- make.names(colnames(emissions_dummy_df))
+cb_index <- createDataPartition(emissions_dummy_df$compact_bin, p = 0.80, list = FALSE)
+train <- emissions_dummy_df[cb_index, ]
+test <- emissions_dummy_df[-cb_index, ]
+table(train$compact_bin)
+ctrl <- trainControl(method = "cv")
+fit <- train(compact_bin~.,
+             data = train, 
+             method = "rpart", 
+             trControl = ctrl)
+fit
+```
+
+```{r}
+## Model with kcluster
+colnames(emissions_dummy_df2) <- make.names(colnames(emissions_dummy_df2))
+cb_index <- createDataPartition(emissions_dummy_df2$kclust, p = 0.80, list = FALSE)
+train <- emissions_dummy_df2[cb_index, ]
+test <- emissions_dummy_df2[-cb_index, ]
+table(train$kclust)
+ctrl <- trainControl(method = "cv")
+fit <- train(kclust~.,
+             data = train, 
+             method = "rpart", 
+             trControl = ctrl)
+fit
+```
+
+```{r}
+## Running model on test set
+fit <- train(kclust~.,
+             data = test, 
+             method = "rpart", 
+             trControl = ctrl)
+fit
+```
+
+```{r}
+## Running model and whole set
+fit <- train(kclust~.,
+             data = emissions_dummy_df2, 
+             method = "rpart", 
+             trControl = ctrl)
+fit
+rpart.plot(fit$finalModel, type = 2)
+preds <- predict(fit$finalModel, emissions_dummy_df2)
+confusionMatrix(as.factor(preds), as.factor(emissions_dummy_df2$kclust))
+```
+
+```{r}
+## Visualizing kclusters
+emissions_dummy_df2 %>%
+  filter(!is.na(carbon_intensity_avg)) %>%
+  mutate(kclust = as.factor(kclust)) %>%
+  group_by(kclust) %>%
+  ggplot(aes(no_hours_with_data, fill=kclust, group=kclust)) +
+  geom_density(alpha=0.5)
+```
+
+```{r}
+## Difference impact from total period average carbon intensity
+country_impacts %>%
+  mutate(diff_avg = total_impact/total_period_avg) %>%
+  ggplot(aes(reorder(Country, diff_avg), diff_avg, fill=Country)) +
+  geom_col(show.legend = F) +
+  geom_hline(yintercept = 1, linetype="dashed") +
+  labs(title="Emissions production", y="Difference from average total", x="Country")
+```
+
+
+```{r}
+emissions %>%
+  group_by(Country) %>%
+  ggplot(aes(carbon_intensity_avg, fill=Country)) +
+  geom_boxplot()
+## Continent carbon impact box-plots for distribution of impact
+impact %>%
+  mutate(regiony = ifelse(country %in% c("Belgium", "Finland", "France", "Germany", "Ireland", "Netherlands", "United Kingdom", "Switzerland", "Sweden"), "Europe", ifelse(country %in% c("USA", "Canada"), "North America", ifelse(country %in% c("Hong Kong", "China", "Singapore", "Taiwan", "India", "South Korea", "Japan"), "Asia", ifelse(country == "Australia", country, ifelse(country == "Brazil", "South America", "Africa")))))) %>%
+  group_by(regiony) %>%
+  ggplot(aes(impact, color=reorder(regiony, impact))) +
+  geom_boxplot() +
+  theme_clean() +
+  labs(title="Average Carbon Intensity of Servers", x="Carbon Intensity", color="Region") +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+```
+

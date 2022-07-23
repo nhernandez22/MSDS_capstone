@@ -1,0 +1,255 @@
+---
+title: "The Environmental Impacts of Machine Learning"
+author: "Nina Hernandez"
+date: "7/13/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## read in data 
+
+```{r}
+library(tidyverse)
+gpus <- read_csv("~/gpus.csv")
+emissions <- read_csv("~/2021-10-27yearly_averages.csv")
+impact <- read_csv("~/impact.csv")
+```
+```{r}
+gpus
+```
+```{r}
+emissions
+```
+```{r}
+impact
+```
+```{r}
+country_impacts <- impact %>%
+  select(provider, country, impact) %>%
+  inner_join(emissions, by = c("country" = "Country")) %>%
+  select(provider, country, impact, year, carbon_intensity_avg, no_hours_with_data) 
+
+country_impacts
+```
+## check nas 
+```{r}
+sapply(country_impacts, function(x) sum (is.na(x)))
+```
+## we probably don't care about 0 hours
+```{r}
+country_impacts %>%
+  filter(is.na(carbon_intensity_avg))
+
+country_impacts <- country_impacts %>%
+  filter(!is.na(carbon_intensity_avg))
+```
+## EDA
+Japan is the only country w/ data from 2016
+```{r}
+country_impacts %>%
+  group_by(country, year) %>%
+  distinct() %>%
+  filter(year == 2016)
+```
+We may consider upsampling here. 
+## drop 2016
+```{r}
+country_impacts %>%
+  filter(year != 2016) %>%
+  group_by(provider) %>%
+  summarise(n = n())
+
+country_impacts <-
+  country_impacts %>%
+  filter(year != 2016) %>%
+  mutate(provider = as.factor(provider))
+```
+
+## upsample 
+```{r}
+#install.packages('groupdata2')
+library(groupdata2)
+upsample(country_impacts, cat_col = "provider") %>%
+  group_by(provider) %>%
+  summarise(n = n())
+
+country_impacts <- upsample(country_impacts, cat_col = "provider")
+```
+
+```{r}
+country_impacts %>%
+  group_by(provider) %>%
+  summarise(mean(impact))
+
+country_impacts %>%
+  group_by(provider) %>%
+  summarise(mean(carbon_intensity_avg))
+```
+drop ovh as this only applies to Canada
+```{r}
+country_impacts %>%
+  filter(provider == 'ovh')
+
+country_impacts <- country_impacts %>%
+  filter(provider != 'ovh')
+```
+```{r}
+library(RColorBrewer)
+library(ggthemes)
+
+country_impacts %>%
+  select(year, carbon_intensity_avg, country) %>%
+  distinct() %>%
+  ggplot(aes(x = year, y = carbon_intensity_avg, fill = country)) +
+  geom_col() +
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "Average Carbon Intensity per Year") +
+  xlab("Year") +
+  ylab(bquote("Carbon Intensity ("~gCO[2]~"/kWh)")) +
+  theme_tufte() +
+  theme(axis.title.x = element_text(size = 9),
+        axis.title.y = element_text(size = 9)) +
+  guides(fill=guide_legend(title="Country"))
+```
+
+## feature_engineering -- bin impact
+```{r}
+country_impacts %>%
+  mutate(impact_bin = cut(impact, breaks = 3)) %>%
+  group_by(impact_bin) %>%
+  summarise(count = n())
+```
+
+## by bin 
+```{r}
+country_impacts %>%
+  mutate(impact_bin = cut(impact, breaks = 3)) %>%
+  group_by(impact_bin, country) %>%
+  summarise(count = n()) %>%
+  ggplot(aes(x = impact_bin, y = count, fill = country)) +
+  geom_col(position = "dodge") + 
+  labs(title = "Count of Impact Intervals By Country") + 
+  xlab(bquote("Impact Bin in"~CO[2]~"eq")) +
+    ylab("Count") + guides(fill=guide_legend(title="Country")) + scale_fill_brewer(palette = "Set1") +
+  theme_tufte()
+
+```
+## could use some better visuals lol
+
+```{r}
+
+```
+
+## feature engineering - create dummy vars
+```{r}
+library(fastDummies)
+country_impacts_dum <- country_impacts %>%
+  mutate(year_f = as.factor(year)) %>%
+  mutate(country_f = as.factor(country)) %>%
+  select(-country, -year)
+
+country_impacts_dum <- dummy_cols(country_impacts_dum, remove_selected_columns = T) 
+```
+
+## add impact_bin variable
+```{r}
+country_impacts_dum <- country_impacts_dum %>%
+  mutate(impact_bin = cut(impact, breaks = 3)) %>%
+  select(-impact) 
+```
+
+## split the data 
+```{r}
+# page 94
+library(caret)
+impact_index <- createDataPartition(country_impacts_dum$impact_bin, p = 0.80, list = FALSE)
+train <- country_impacts_dum[impact_index, ]
+test <- country_impacts_dum[-impact_index, ]
+
+table(train$impact)
+```
+
+## fit a basic model
+```{r}
+library(rpart)
+ctrl <- trainControl(method = "cv")
+
+fit <- train(impact_bin ~.,
+             data = train, 
+             method = "rpart", 
+             trControl = ctrl,
+             metric = "Kappa")
+
+fit
+```
+```{r}
+library(rpart.plot)
+rpart.plot(fit$finalModel, type = 2)
+```
+
+## confusion matrix 
+```{r}
+pred <- predict(fit, newdata=test)
+confusionMatrix(factor(pred),factor(test$impact_bin))
+```
+
+## lower complexity 
+
+```{r}
+fit <- train(impact_bin ~.,
+             data = train,
+             trControl = ctrl,
+             method = "rpart",
+             tuneLength = 15,
+             metric = "Kappa")
+
+fit
+```
+
+```{r}
+rpart.plot(fit$finalModel, type = 2)
+```
+
+## confusion matrix 
+```{r}
+pred <- predict(fit, newdata=test)
+confusionMatrix(factor(pred),factor(test$impact_bin))
+```
+
+## weighted model
+
+```{r}
+weight_train <- train %>%
+  mutate(weights=case_when(
+    impact_bin == "(19.1,320]" ~ 1.79902,
+    impact_bin == "(320,620]" ~ 1.320144, 
+    impact_bin == "(620,921]" ~ 1))
+
+fit <- train(impact_bin ~ .,
+             data = train,
+             method = "rpart",
+             tuneLength = 10,
+             weights = weight_train$weights,
+             trControl = ctrl) 
+fit
+```
+```{r}
+rpart.plot(fit$finalModel, type = 2)
+```
+## confusion matrix 
+```{r}
+pred <- predict(fit, newdata=test)
+confusionMatrix(factor(pred),factor(test$impact_bin))
+```
+
+## lol, we need to fix that somehow^^
+ - Random Forest? 
+ - Bagging?
+Something that isn't sensitive to class imbalances 
+
+## other things we may consider 
+analyze 'gpus' dataset
+
