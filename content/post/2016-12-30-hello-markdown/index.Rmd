@@ -1,5 +1,5 @@
 ---
-title: 'Route Finder App using OpenBeta Climbing Data'
+title: 'Oregon Route Finder App using OpenBeta Climbing Data'
 author: "Nina"
 date: '2022-05-30'
 output:
