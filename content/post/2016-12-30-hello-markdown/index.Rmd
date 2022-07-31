@@ -15,7 +15,7 @@ categories:
 ---
 ## Introduction 
      The population of climbers is exploding and we need more and better access to data to make the sport more accessible. I am using data provided from OpenBeta, a nonprofit built and run by climbers that enables “open access and innovative uses of climbing data” (1). I built a Shiny app that includes a map of sport and trad climbing routes in Oregon ranked by route quality and a recommendation engine tailored to users of any skill level.  
-     Following theintroduction of climbing as a sport at the 2021 Tokyo Olympics, and the success of films such as *Free Solo* featuring Alex Honnold (2018) and *The Dawn Wall* starring Tommy Caldwell (2018), the industry has seen, and continues to see historic growth and opportunities for new, profitable markets. According to Forbes, Google searches that included the term “climbing” reached an all time high in the first week of August 2021; the same time frame that men’s and women’s combined events were held in Tokyo (2). Not only is the sport gaining a bigger audience, but it is also attracting regular people like you and me to take a crack at the crag. Following the pandemic, nearly 100 climbing gyms have opened in North America and profits of El Cap, one of America’s largest operators of climbing facilities, saw a 100% increase in online interactions (2).  
+     Following the introduction of climbing as a sport at the 2021 Tokyo Olympics, and the success of films such as *Free Solo* featuring Alex Honnold (2018) and *The Dawn Wall* starring Tommy Caldwell (2018), the industry has seen, and continues to see historic growth and opportunities for new, profitable markets. According to Forbes, Google searches that included the term “climbing” reached an all time high in the first week of August 2021; the same time frame that men’s and women’s combined events were held in Tokyo (2). Not only is the sport gaining a bigger audience, but it is also attracting regular people like you and me to take a crack at the crag. Following the pandemic, nearly 100 climbing gyms have opened in North America and profits of El Cap, one of America’s largest operators of climbing facilities, saw a 100% increase in online interactions (2).  
      One concern with the sport’s booming popularity is the barrier to entry (e.g. where to find routes, at what level to begin, the fear of picking routes at the wrong level, etc.) and, as a result, there has been a push to make the sport more accessible. In addition, there are only a few databases with outdoor climbing routes that are accessible to the public. The Mountain Project or 8A are serviceable, but the sport needs more. Without these additional platforms, climbers who are looking to hit their local crag or boulder may not be able to find routes or learn about the quality of them if they do not already have community or word of mouth. While these websites have provided helpful tools to climbers of all experience and skill levels, they are still sorely  lacking data.  And scrapings of these platforms have resulted in DMCA take downs and/or lawsuits (3). At the bare minimum, we need better and easier access to climbing data so that data scientists like myself can work to advance the sport for others. As the sport grows so will the influx of data, and with any field that is expanding and rapidly changing, data science can add value by helping climbers and stakeholders make better-informed decisions, thereby generating new insights about its players and audience, and increasing the overall experience for users.  
      OpenBeta is a non-profit built and run by climbers that enables “open access and innovative uses of climbing data” (1). Though they have also faced several challenges with their attempt to use onX’s data from the Mountain Project with copyright infringement and blocked repositories, according to *Outside Learn* (3). At the moment their data is public, and Github recently reversed the DMCA takedown thanks to legal efforts from the owner, Viet Nguyen, who is "empowering the community with open license climbing betas and source tools" (1). His goal for OpenBeta is to make climbing data more like an open source project, which in turn would help platforms like Mountain Project to increase their recommendation systems, geolocation data, and the accuracy of submissions (3). In addition to pushing for accessible data, the OpenBeta also posts articles that fit the needs of any climber in STEM: tutorials, current events, and project inspirations like recommendation systems and route quality maps. The community that OpenBeta is fostering aligns heavily with the forward mentality of today’s climbing community which is: don’t be a gatekeeper, spread the beta, and anyone is capable if empowered with the right information.  
       As a young climber and data scientist, I found myself incredibly inspired by OpenBeta’s work and wanted to support the nonprofit by using their data and some of their resources for my capstone project.  I want to leverage climbing data to influence decision making for climbers of all skill sets and as a result, contribute to the overarching goal of OpenBeta which is to make the sport of climbing safer, more knowledgeable, and more accessible. Recommendation systems are extremely powerful and if done well, can be a great tool for young climbers when exploring outdoor routes. To get a better understanding of the data and to ensure the viability of this goal, I first performed an exploratory data analysis of the OpenBeta data. 
@@ -175,16 +175,28 @@ or_ratings %>%
   theme_tufte() +
   labs(x = "\nNumber of Votes\n", y = "\nMedian Rating\n", title = "Median Ratings vs Number of Votes by ARQI Class\n")
 ```
-      At the state level, we found that a majority of routes fall in the Good to Area Classic range with outliers in the Bad class. But what about at the grade level?
+      At the state level, we found that a majority of routes fall in the Area Classic to Classic class with outliers in the Bad to Bomb class. But what about at the grade level?
 ```{r, echo = FALSE}
 or_ratings %>%
   group_by(state) %>%
-  ggplot(aes(x = state, y = ARQI_median, fill = state)) +
+  ggplot(aes(x = 0, y = ARQI_median, fill = state)) +
   geom_boxplot() +
   scale_fill_brewer(palette = "Set2") + 
+  labs(x = "", y = "ARQI\n", title = "Distribution of Oregon ARQI Scores\n") +
   theme_tufte() +
-  labs(x = "", y = "ARQI\n", title = "Distribution of ARQI Scores\n") +
-  theme(legend.position = "none")
+  theme(legend.position = "none",
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        plot.background = element_rect(fill = 'grey90')) +
+  geom_hline(yintercept = 3.5, linetype = "dashed", color = "#FFFFB2") +
+  geom_hline(yintercept = 2.5, linetype = "dashed", color = "#FECC5C") +
+  geom_hline(yintercept = 1.5, linetype = "dashed", color = "#FD8D3C") +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "#BD0026") +
+  annotate(x = 0.1, y = 3.7, geom = "text", label = "Classic", size = 2, family = 'serif') +
+  annotate(x = 0.1, y = 2.7, geom = "text", label = "Area Classic", size = 2, family = 'serif') +
+  annotate(x = 0.1, y = 1.7, geom = "text", label = "Good", size = 2, family = 'serif') +
+  annotate(x = 0.1, y = .7, geom = "text", label = "Bad", size = 2, family = 'serif') +
+  annotate(x = 0.1, y = 0, geom = "text", label = "Bomb", size = 2, family = 'serif')
 ```
 
       We find that a majority of easy and intermediate routes are both classic and area classics, which supports my claim that anyone can climb a classic not only at their local crag but additionally famous big walls climbed by the legends. 
@@ -196,7 +208,7 @@ or_ratings %>%
   geom_bar(aes(fill = class), position = "dodge") +
   scale_fill_brewer(palette = "Set1") +
   theme_tufte() + 
-  labs(x = "\nLevel\n", y = "Number of Routes\n", title = "Distribution of Route Classes by Grade Level")
+  labs(x = "\nLevel\n", y = "Number of Routes\n", title = "Distribution of Route Classes by Grade Level") 
   
 ```
 
@@ -350,17 +362,19 @@ orGeo_trad %>%
 
 # Recommendations
 
-      For the recommendation system, I created an item based collaborative-filtering recommender which asks the question “for users who climbed route x, which routes did they also climb?” and can predict routes based on past preferences of other users (1). Following the OpenBeta's structure, I wanted to make this aspect of my project a tutorial in order to provide transparency behind how recommendations are made and also a resource for future development. From what I've seen on famous route finders like theCrag or MP, these platforms do not implement recommendation systems for their routes (4, 5). They usually order the routes by popularity (average ratings or number of votes) but any data analyst using mean, median, or count as a metric for popularity should know to always consider outliers, skewed data, and relative proportions. In addition, I think having a simple recommendation system would be ideal for new climbers looking to find their first projects. I believe that a recommendation system combined with a map of route quality by the AQRI score also benefits the experienced climber as well. For example, if they disagree with the location, rating or quality assessment of a certain route and as a result, a failed recommendation to the climber, the user can enter more data into the Mountain Project (where OpenBeta gets its data) which they believe is more accurate. When the data funneling into the model becomes more accurate, you get a better recommendation, a better user experience, increased retention, and so on.  
+      For the recommendation system, I created an item based collaborative-filtering recommender which asks the question “for users who climbed route x, which routes did they also climb?” and can predict routes based on past preferences of other users (1). Following OpenBeta's structure, I wanted to make this aspect of my project a tutorial in order to provide transparency behind how recommendations are made and also a resource for future development. From what I've seen on famous route finders like theCrag or MP, these platforms do not implement recommendation systems for their routes (4, 5). They usually order the routes by popularity (average ratings or number of votes) but any data analyst using mean, median, or count as a metric for popularity should know to always consider outliers, skewed data, and relative proportions. In addition, I think having a simple recommendation system would be ideal for new climbers looking to find their first projects. I believe that a recommendation system combined with a map of route quality by the AQRI score also benefits the experienced climber as well. For example, if they disagree with the location, rating or quality assessment of a certain route and as a result, a failed recommendation to the climber, the user can enter more data into the Mountain Project (where OpenBeta gets its data) which they believe is more accurate. When the data funneling into the model becomes more accurate, you get a better recommendation, a better user experience, increased retention, and so on.  
 
 ## Item Based Recommendation Tutorial
 
-My main reference for creating a simple item based recommendation comes from (6). Here I am taking the complete cases of my entire ratings dataset. Since recommendation systems are so computationally heavy, I had to get rid of any observations with nulls to decrease the load. This is definitely a limitation to the accuracy of the recommendation. 
+My main reference for creating a simple item based recommendation comes from (6). Here I am taking the complete cases of my entire ratings dataset. Since recommendation systems are so computationally heavy, we should first get rid of any observations with nulls to decrease the load. 
 
 ```{r, include = FALSE, echo = FALSE}
 or_ratings <- or_ratings[complete.cases(or_ratings),]
 ```
 
-First, we are going to choose a route that a climber from the Pacific Northwest may care about in order to get some recommendations based on that route. We could find the most popular route by looking at the route with the most votes, but we can now apply our new knowledge of the ARQI metric to get the route with the best quality.
+## Find a Route 
+
+Next, we are going to choose a route that a climber from the Pacific Northwest may care about in order to get some recommendations based on that route. We could find the most popular route by looking at the route with the most votes, but we can now apply our new knowledge of the ARQI metric to get the route with the best quality.
 
 ```{r}
 or_ratings %>%
@@ -377,7 +391,7 @@ or_ratings %>%
   select(route_id, route_name, grade, type, parent_sector, class, level) %>%
   slice(1)
 ```
-## Overview 
+
 
 The route ID with the greatest ARQI is a route called "Spank the Monkey" which is a classic, easy 5.1 sport route from the Monkey Face wall which is a very popular wall in Smith Rock. Item Based Collaborative Filtering answers the question "climbers who climbed Spank the Monkey also climbed...?"
       
@@ -387,7 +401,7 @@ The route ID with the greatest ARQI is a route called "Spank the Monkey" which i
 
 ## Create User-Product Matrix 
 
-First we spread out our users, route ID, and ratings across a pivot table that we convert to a simple matrix, called the user-product matrix, for calculating similarity scores. 
+Now we spread out our users, route ID, and ratings across a pivot table that we convert to a simple matrix, called the user-product matrix, for calculating similarity scores. 
 
 ```{r, warning = FALSE}
 or_wide <- or_ratings %>%
@@ -411,7 +425,7 @@ sum(is.na(or_mat))/(ncol(or_mat) * nrow(or_mat))
 
 ## Use Cosine Similarity to Measure Distance 
 
-We can use the cosine similarity to measure distances versus the Euclidean distance since the cosine distance looks at directional similarity rather than magnitudinal differences. Here I am hoping to capture beyond the numbers and get more content out of them. For example, a route that gets a rating of 3.0 four times and 4.0 eight times will have a 100% similarity score to a route that has one 3.0 ratings and two 4.0 ratings. If we were computing euclidean distance, this would give us a similarity of only 13%. I'm hoping that this method can be viable in tackling the data sparsity issue. 
+We can use the cosine similarity to measure distances versus the Euclidean distance since the cosine distance looks at directional similarity rather than magnitudinal differences. For example, a route that gets a rating of 3.0 four times and 4.0 eight times will have a 100% similarity score to a route that has one 3.0 ratings and two 4.0 ratings. If we were computing euclidean distance, this would give us a similarity of only 13%. I'm hoping that this method can be viable in tackling the data sparsity issue. 
 
 ```{r, warning = FALSE, message = FALSE}
 library(lsa)
@@ -425,7 +439,7 @@ cosine(route_x, route_y) # cosine
 
 ## Compute 
 
-We can build a function to compute the similarity for various routes in our matrix. 
+The next step is to build a function to compute the similarity for various routes in our matrix. 
 
 ```{r}
 cos_similarity = function(A,B){
@@ -439,7 +453,7 @@ cos_similarity = function(A,B){
 
 ##  Product-Product matrix 
 
-Now we can apply this function to obtain the product-product matrix. To prevent memory overload, we create a function to calculate the similarity only on the route we choose. 
+Now we can apply this function to obtain the product-product matrix. To prevent memory overload, we create a function to calculate the similarity for one route at a time. 
 
 ```{r}
 route_recommendation = function(route_id, rating_matrix = or_mat, n_recommendations = 5){
@@ -472,7 +486,8 @@ recommendations
 
 ## Join with Ratings Data 
 
-Next, we can join back to our original data to get information about the recommended routes. We now have information about similar routes climbed by users that also climbed and rated Spank the Monkey in a similar way. The most similar route to Spank the Monkey is The Conspiracy which is located at the Red Wall (also in Smith Rock). In the Shiny App, I wanted the user to be able to explore the parent walls of the recommended routes so that they could also see the proximity of like-routes. To build upon this method, one could also implement machine learning frameworks such as K-Nearest Neighbors to compute the cosine similarity more accurately with cross validation and hyperparameter tuning. My primary focus on the first rollout of my Shiny app was the user experience, not the model building, but this is an ongoing project that I plan to keep building upon and improving. 
+Now we can join back to our original data to get information about the recommended routes. We now have information about similar routes climbed by users that also climbed and rated Spank the Monkey in a similar way. The most similar route to Spank the Monkey is The Conspiracy which is located at the Red Wall, another popular big wall in Smith Rock.  
+
 
 ```{r, echo = FALSE}
 or_sub <- or_ratings %>%
@@ -487,6 +502,7 @@ rec_tbl <- recommendations %>%
 rec_tbl
 ```
 
+      In the Shiny App, I wanted the user to be able to explore the parent walls of the recommended routes so that they could also see the proximity of like-routes. To build upon this method, one could also implement machine learning frameworks such as K-Nearest Neighbors to compute the cosine similarity more accurately with cross validation and hyperparameter tuning. My primary focus on the first rollout of my Shiny app was the user experience, not the model building, but this is an ongoing project that I plan to keep building upon and improving. 
 ## Shiny App 
      With the proof of concept complete I was able to bring all the working pieces together in constructing my Shiny app. As seen below, the user can apply basic filters such as the grade range and type to get a quick map of available routes. When the user hovers over a point on the map, they get an overview of the parent wall which includes the name and location of the wall and information about an example route at the wall. If they click the parent wall, they can get a list of all the routes at the wall with more granularity. The table below includes additional metadata such as the number of votes, the grade class, the level class and more for each route. It is also ordered from highest rating to lowest which makes it easy for users to find the top routes at each parent sector.
 
@@ -496,13 +512,13 @@ knitr::include_url("https://nhernandez.shinyapps.io/climbing_app/", height = "10
 **Link:** https://nhernandez.shinyapps.io/climbing_app/
 
      The incorporation of the route recommender is my favorite part of the Shiny app. If the user clicks on a row of the main table, a second table popups to the right of the plot with the top five recommendations for that route. This mini table also has metadata about the various routes and specifically the parent wall where each route is located. With this information the user can enter individual parent walls (see the “Enter a Parent Wall" input option on the top left panel) for plotting, which allows the users to see where recommended routes are located relative to the initial parent wall they clicked on the map.  
-     I wanted to make the functionality of the app as user friendly as possible. I wanted to match the natural intuition of user experience by making the app fluid and continuous, but I also wanted to provide guidance if a user gets stuck. There are help buttons that provide an overview of class and grade distributions that were explained earlier in this article. This gives the user a solid place to start for navigating routes if they're unsure of what they want. Notice, however, that the help buttons have to be clicked in order to trigger the pop-ups. I don't want to "scare" the user away with information overload by covering the entire shiny app with text. I also don't want users to feel like there is a *right* place to start -- I want the experience to be their own and freely structured while still providing any information the user might need.   
+     I wanted to make the functionality of the app as user friendly as possible. I wanted to match the natural intuition of user experience by making the app fluid and continuous, but I also wanted to provide guidance if a user gets stuck. There are help buttons that provide an overview of class and grade distributions that were explained earlier in this article. This gives the user a solid place to start for navigating routes if they're unsure of what they want. Notice, however, that the help buttons have to be clicked in order to trigger the pop-ups. I don't want to "scare" the user away with information overload by covering the entire app with text. I also don't want users to feel like there is a *wrong* place to start -- I want the experience to be their own and freely structured while still providing any information the user might need.   
      Putting my technical skills into a topic that I'm passionate about really allowed me to construct an app that I feel was effective and multidimensional. I was inspired by  OpenBeta’s work to produce a project that aligns with making the sport of rock climbing more accessible as well as supporting open source projects in software development. I feel that my unique experiences as a data scientist as well as a climber have allowed me to give back to both communities with this project. While my project is, at present, only a resource for the Oregon climbing community, I believe that it could be scaled out and be equally useful nationally and even globally; wherever there are rocks and mountains, and people who yearn to climb them. I’m excited to see where this sport goes in the coming years and I hope to reflect such change in my project.   
 
 # Conclusion 
 
      One limitation of my project is the restriction placed on the data I’m using. Following a legal battle with onX regarding a copyright infringement, which OpenBeta won (as noncommercial and educational factual data cannot be copyrighted), OpenBeta is working to release their data under a public domain, permissive license (1,3). For this reason, all of OpenBeta’s current datasets only include user ratings up to 2020, and it doesn’t seem like they will be able to update them by August. Therefore, there is a missed opportunity for generating better recommendations without input following the increase of climbers after Tokyo. In the future, climbing data from the Mountain Project will be streamed directly into the model prior to rollouts and will allow for optimal and more accurate results or recommendations.  
-      My route finder is free tool to the Oregon climbing community which streamlines the route searching process for climbers of varying skill sets. I also hope that this post is a resource that any stakeholder (like participants, spectators, media, sponsors, businesses, brands, developers, analysts etc.) could benefit from. Guiding the recent explosion of climbers properly could help make the sport extremely profitable and the climbing community greater and diverse. I hope to help dissolve barriers to entry by providing a tool to climbers that keeps them safe, in the loop, and connected to other climbers. For the data community, I also want to promote the open source movement in software and data as I strongly believe that it is essential in encouraging innovation, attracting diverse talent, and broadening perspectives within tech. 
+      My route finder is a free tool to the Oregon climbing community which streamlines the route searching process for climbers of varying skill sets. I also hope that this post is a resource that any stakeholder (like participants, spectators, media, sponsors, businesses, brands, developers, analysts etc.) could benefit from. Guiding the recent explosion of climbers properly could help make the sport extremely profitable and the climbing community greater and diverse. I hope to help dissolve barriers to entry by providing a tool to climbers that keeps them safe, in the loop, and connected to other climbers. For the data community, I also want to promote the open source movement in software and data as I strongly believe that it is essential in encouraging innovation, attracting diverse talent, and broadening perspectives within tech. 
 
 1. https://OpenBeta.io/
 2. https://www.forbes.com/sites/michellebruton/2021/11/24/interest-in-climbing-and-gym-memberships-have-spiked-following-sports-tokyo-olympics-debut/?sh=3daaf24326a8
