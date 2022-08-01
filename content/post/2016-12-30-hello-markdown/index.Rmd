@@ -175,7 +175,7 @@ or_ratings %>%
   theme_tufte() +
   labs(x = "\nNumber of Votes\n", y = "\nMedian Rating\n", title = "Median Ratings vs Number of Votes by ARQI Class\n")
 ```
-      At the state level, we found that a majority of routes are Area Classics with outliers in the Bad to Bomb class. But what about at the grade level?
+      Looking at the state level, we find that a greater percentage of Oregon routes fall into the "Area Classic" range with outliers in the "Bad" to "Bomb" class. But what about at the grade level?
 ```{r, echo = FALSE}
 or_ratings %>%
   group_by(state) %>%
@@ -199,7 +199,7 @@ or_ratings %>%
   annotate(x = 0.1, y = 0, geom = "text", label = "Bomb", size = 2, family = 'serif')
 ```
 
-      We find that a majority of easy and intermediate routes are both classic and area classics, which supports my claim that anyone can climb a classic not only at their local crag but additionally famous big walls climbed by the legends. 
+      A majority of easy and intermediate routes are both classic and area classics, which supports my claim that anyone can climb a classic not only at their local crag but additionally famous big walls climbed by the legends. 
 
 ```{r, echo = FALSE}
 or_ratings %>%
