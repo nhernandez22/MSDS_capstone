@@ -175,7 +175,7 @@ or_ratings %>%
   theme_tufte() +
   labs(x = "\nNumber of Votes\n", y = "\nMedian Rating\n", title = "Median Ratings vs Number of Votes by ARQI Class\n")
 ```
-      At the state level, we found that a majority of routes fall in the Area Classic to Classic class with outliers in the Bad to Bomb class. But what about at the grade level?
+      At the state level, we found that a majority of routes are Area Classics with outliers in the Bad to Bomb class. But what about at the grade level?
 ```{r, echo = FALSE}
 or_ratings %>%
   group_by(state) %>%
