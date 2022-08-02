@@ -503,8 +503,11 @@ rec_tbl
 ```
 
       In the Shiny App, I wanted the user to be able to explore the parent walls of the recommended routes so that they could also see the proximity of like-routes. To build upon this method, one could also implement machine learning frameworks such as K-Nearest Neighbors to compute the cosine similarity more accurately with cross validation and hyperparameter tuning. My primary focus on the first rollout of my Shiny app was the user experience, not the model building, but this is an ongoing project that I plan to keep building upon and improving. 
-## Shiny App 
-     With the proof of concept complete I was able to bring all the working pieces together in constructing my Shiny app. As seen below, the user can apply basic filters such as the grade range and type to get a quick map of available routes. When the user hovers over a point on the map, they get an overview of the parent wall which includes the name and location of the wall and information about an example route at the wall. If they click the parent wall, they can get a list of all the routes at the wall with more granularity. The table below includes additional metadata such as the number of votes, the grade class, the level class and more for each route. It is also ordered from highest rating to lowest which makes it easy for users to find the top routes at each parent sector.
+      
+
+## Shiny App  
+
+      With the proof of concept complete I was able to bring all the working pieces together in constructing my Shiny app. As seen below, the user can apply basic filters such as the grade range and type to get a quick map of available routes. When the user hovers over a point on the map, they get an overview of the parent wall which includes the name and location of the wall and information about an example route at the wall. If they click the parent wall, they can get a list of all the routes at the wall with more granularity. The table below includes additional metadata such as the number of votes, the grade class, the level class and more for each route. It is also ordered from highest rating to lowest which makes it easy for users to find the top routes at each parent sector.
 
 ```{r}
 knitr::include_url("https://nhernandez.shinyapps.io/climbing_app/", height = "1000px")
